@@ -10,7 +10,7 @@ st.title("Real Estate Price Prediction")
 model = pickle.load(open("random_forest_model.pkl", "rb"))
 scaler = pickle.load(open("scaler.pkl", "rb"))
 
-# Locality and Region options (as per training data)
+# Locality and Region options
 locality_options = ['Ahmedabad', 'Bangalore', 'Chennai', 'Ghaziabad', 'Delhi',
                     'New Delhi', 'Hyderabad', 'Jaipur', 'Kolkata', 'Mumbai',
                     'Noida', 'Faridabad', 'Pune']

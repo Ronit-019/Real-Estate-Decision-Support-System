@@ -26,11 +26,7 @@ feature_cols = [
 # Target Column
 target_col = 'price'
 
-# Feature Selection via Multiselect
 selected_features = st.multiselect("Select Features to Include:", feature_cols, default='BHK')
-
-# Display and Edit Selected Feature Values
-sample_row = df[selected_features].iloc[0].copy()
 
 # Preprocessing: Encoding Categorical Features
 categorical_cols = ['Furnishing', 'Facing Direction', 'locality', 'region',

@@ -4,31 +4,23 @@ import numpy as np
 import faiss
 from sklearn.preprocessing import StandardScaler
 
-
-# -------------------------------
-# Load Dataset
-# -------------------------------
 @st.cache_data
 def load_data():
     return pd.read_csv("REAL-ESTATE-DATASET.csv")
 
-
 df = load_data()
 
-# -------------------------------
-# Sidebar Inputs
-# -------------------------------
 st.sidebar.title("🏙️ Property Recommendation Filters")
 
-# 1. Locality selection (Compulsory)
+# Locality selection (Compulsory)
 localities = df['locality'].dropna().unique()
 user_locality = st.sidebar.selectbox("Select Locality (City)", sorted(localities))
 
-# 2. Optional filters
+# Optional filters
 st.sidebar.subheader("Optional Feature Filters")
 feature_values = {}
 
-# 2a. Numerical range filters
+# Numerical range filters
 range_features = ['price', 'Built-up Area (sqft)', 'Carpet Area (sqft)']
 for col in range_features:
     if col in df.columns:
@@ -42,7 +34,7 @@ for col in range_features:
                                                 key=col + "_max")
             feature_values[col] = (min_input, max_input)
 
-# 2b. Fixed-value numerical filters
+# Fixed-value numerical filters
 fixed_num_features = ['BHK', 'bathrooms', 'Bedrooms', 'Floor', 'Total Floors']
 for col in fixed_num_features:
     if col in df.columns:
@@ -52,7 +44,7 @@ for col in fixed_num_features:
         if selected != "Don't care":
             feature_values[col] = float(selected)
 
-# 2c. Categorical features with "Don't care"
+# Categorical features with "Don't care"
 categorical_features = ['Furnishing', 'Facing Direction']
 for col in categorical_features:
     if col in df.columns:
@@ -62,7 +54,7 @@ for col in categorical_features:
         if selected != "Don't care":
             feature_values[col] = selected
 
-# 2d. Boolean features
+# Boolean features
 boolean_features = ['Cctv', 'Community Hall', 'Garden', 'Gym', 'Kids Area',
                     'Lift', 'Parking', 'Power Backup', 'Sports Facility', 'Swimming Pool']
 for col in boolean_features:
@@ -73,7 +65,7 @@ for col in boolean_features:
         elif selected == "No":
             feature_values[col] = 0
 
-# 3. Number of recommendations
+# Number of recommendations
 n_recommendations = st.sidebar.slider("Number of Recommendations", 1, 10, 5)
 
 
@@ -83,12 +75,11 @@ st.write(f"Showing recommendations based on locality: **{user_locality}**")
 
 
 def guided_locality_recommender(df, locality, feature_values, n=5):
-    # Step 1: Filter dataset for locality
+
     df_local = df[df['locality'].str.lower().str.strip() == locality.lower().strip()].reset_index(drop=True)
     if df_local.empty:
         return pd.DataFrame()
 
-    # Step 2: Apply all user-defined filters
     for feat, val in feature_values.items():
         if feat in df_local.columns:
             if isinstance(val, tuple) and len(val) == 2:
@@ -100,25 +91,20 @@ def guided_locality_recommender(df, locality, feature_values, n=5):
     if df_local.empty or len(df_local) <= 1:
         return pd.DataFrame()
 
-    # Step 3: Prepare selected feature matrix
     selected_cols = list(feature_values.keys())
     X = df_local[selected_cols].copy()
 
-    # Step 4: Encode categorical columns
     categorical_cols = ['Furnishing', 'Facing Direction']
     X_encoded = pd.get_dummies(X, columns=[col for col in categorical_cols if col in X.columns], drop_first=True)
 
     if X_encoded.empty:
         return pd.DataFrame()
 
-    # Step 5: Normalize for FAISS
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X_encoded).astype('float32')
-    print(X_scaled)
-    # Step 6: Run FAISS similarity search
+
     index = faiss.IndexFlatL2(X_scaled.shape[1])
     index.add(X_scaled)
-    print(index)
 
     reference_idx = 0
     distances, indices = index.search(np.array([X_scaled[reference_idx]]), n + 1)

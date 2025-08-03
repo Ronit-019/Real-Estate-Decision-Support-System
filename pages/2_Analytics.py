@@ -79,7 +79,6 @@ fig6 = px.bar(amenities_count, x='Count', y='Amenity', orientation='h')
 fig6.update_layout(xaxis_title='Number of Properties', yaxis_title='Amenity Type',title='Availability of Amenities Across Properties')
 st.plotly_chart(fig6)
 
-
 df['Facing Direction'] = df['Facing Direction'].replace('Northeast Facing', 'North East Facing')
 
 region_price = df.groupby('Facing Direction')['price'].mean().reset_index().sort_values(by='price')
