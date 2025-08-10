@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import faiss
 from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import NearestNeighbors  # Replace faiss with this
 
 @st.cache_data
 def load_data():
@@ -68,10 +68,8 @@ for col in boolean_features:
 # Number of recommendations
 n_recommendations = st.sidebar.slider("Number of Recommendations", 1, 10, 5)
 
-
 st.title("🏠 Smart Property Recommender")
 st.write(f"Showing recommendations based on locality: **{user_locality}**")
-
 
 
 def guided_locality_recommender(df, locality, feature_values, n=5):
@@ -103,14 +101,16 @@ def guided_locality_recommender(df, locality, feature_values, n=5):
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X_encoded).astype('float32')
 
-    index = faiss.IndexFlatL2(X_scaled.shape[1])
-    index.add(X_scaled)
+    # Replace faiss index creation and search with sklearn NearestNeighbors
+    nbrs = NearestNeighbors(n_neighbors=n + 1, algorithm='auto', metric='euclidean')
+    nbrs.fit(X_scaled)
 
     reference_idx = 0
-    distances, indices = index.search(np.array([X_scaled[reference_idx]]), n + 1)
+    distances, indices = nbrs.kneighbors([X_scaled[reference_idx]])
     recommended_indices = indices[0][1:]
 
     return df_local.iloc[recommended_indices][['flat_name', 'real_name', 'locality'] + selected_cols]
+
 
 if st.button("🔍 Show Recommendations", disabled=not feature_values):
     results = guided_locality_recommender(df, user_locality, feature_values, n_recommendations)
