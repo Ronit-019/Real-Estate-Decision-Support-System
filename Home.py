@@ -5,7 +5,7 @@ st.set_page_config(
 )
 
 st.markdown("""
-# 🏡 Real Estate Insights Dashboard
+# 🏡 Real Estate Decision Support System
 
 **Make smarter property decisions with the power of Data and Machine Learning.**
 
