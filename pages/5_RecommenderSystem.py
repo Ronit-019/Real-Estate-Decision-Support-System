@@ -101,7 +101,6 @@ def guided_locality_recommender(df, locality, feature_values, n=5):
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X_encoded).astype('float32')
 
-    # Replace faiss index creation and search with sklearn NearestNeighbors
     nbrs = NearestNeighbors(n_neighbors=n + 1, algorithm='auto', metric='euclidean')
     nbrs.fit(X_scaled)
 
